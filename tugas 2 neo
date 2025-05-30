@@ -1,0 +1,100 @@
+const express = require ('express');
+const PORT = 3000;
+
+const app = express()
+
+app.use (express.json())
+
+app.get ('/', (req, res) => {
+    res.send ('Halo semuanya!')
+})
+
+
+let lagu = [
+    {id: 1, judul : 'Satu Bulan', album : 'Bernadya'},
+    {id: 2,judul : 'Pelangi', album : 'HIVI!'},
+    {id: 3, judul : 'ours to keep', album : 'Kendis'},
+]   
+app.get ('/lagu', (req, res) => {
+    res.status (200).json({
+        message : 'Lagu berhasil di dapatkan',
+        data: lagu
+    })
+})
+
+app.get ('/lagu/:id', (req, res) => {
+    const id = parseInt (req.params.id)
+    const cariLagu = lagu.find ( lagu=>lagu.id === id)
+    if (!cariLagu){
+        return res.status (404).json ({
+            message : 'Lagu tidak ditemukan'
+        })
+    }
+    res.status(200).json({
+        message : 'berhasil mendapatkan lagu baru',
+        data: cariLagu
+    })
+})
+
+app.put ('/edit-lagu/:id', (req, res) => {
+    const  id = parseInt(req.params.id)
+    const { judul, album } = req.body
+    const cariLagu = lagu.find (lagu => lagu.id === id)
+    if (!cariLagu){
+         return res.status (404).json ({
+            message : 'Lagu tidak ditemukan'
+        })
+    }
+    if (!lagu || !album){
+        return res.status(400).json({
+            message : 'lagu dan album harus diisi'
+        })
+    }
+    cariLagu.judul = judul
+    cariLagu.album = album
+    res.status(200).json({
+        message : 'berhasil mengedit lagu baru',
+        data: cariLagu
+    })
+    
+})
+
+app.post ('/tambah-lagu', (req, res) => {
+    const id = lagu.length + 1
+    const {judul, album } = req.body
+    if (!judul || !album){
+        return res.status(400).json({
+            message: 'Lagu dan Album harus diisi!'
+        })
+    }
+    const newLagu = {id, judul, album}
+    lagu.push(newLagu)
+    res.status(201).json({
+        message : 'berhasil menambahkan lagu',
+        data : newLagu
+    })
+})
+
+
+app.delete ('/hapus-lagu/:id', (req, res) => {
+    const id = parseInt (req.params.id)
+    const cariLagu = lagu.findIndex (lagu =>  lagu.id === id)
+    if (cariLagu === -1){
+        return res.status (404).json({
+            message : 'Berhasil menghapuskan lagu',
+            data : Lagu
+        })
+    }
+    lagu.splice (cariLagu, 1)
+    res.status(200).json ({
+        message : 'berhasil menghapus lagu',
+        data : lagu
+    })
+
+})
+
+
+
+app.listen (PORT, () => {
+    console.log (`Server is running on http://localhost:${PORT}`)
+})
